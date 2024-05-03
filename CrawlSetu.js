@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, createWriteStream } from 'fs'
 import { join } from 'path'
 import { get } from 'http' // 当URL为https时因修改为'https'
 
-// 设置图片保存目录，当前目录下的img目录中
-const saveDir = 'img'
+// 设置图片保存目录，当前目录上一级img目录中
+const saveDir = '../img'
 if (!existsSync(saveDir)) {
     try {
         mkdirSync(saveDir, { recursive: true })

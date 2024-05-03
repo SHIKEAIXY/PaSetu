@@ -10,8 +10,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 设置图片保存目录，当前目录下的img目录中
-save_dir = Path('img')
+# 设置图片保存目录，当前目录上一级img目录中
+save_dir = Path('../img')
 save_dir.mkdir(parents=True, exist_ok=True)
 
 # 爬取的图片地址
