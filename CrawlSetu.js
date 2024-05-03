@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, createWriteStream } from 'fs'
 import { join } from 'path'
 import { get } from 'http'
 
-// 设置图片保存目录
+// 设置图片保存目录，当前目录下的img目录中
 const saveDir = 'img'
 if (!existsSync(saveDir)) {
     try {
@@ -41,6 +41,6 @@ function downloadImage(url, index) {
     })
 }
 
-// 下载图片数量，默认500（
-const maxImages = 500
+// 下载图片数量，默认100（
+const maxImages = 100
 downloadImage(url, 0)

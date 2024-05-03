@@ -1,4 +1,3 @@
-# 修改岁纳京子的原程序进行优化
 import os
 import shutil
 import requests
@@ -11,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 设置图片保存目录
+# 设置图片保存目录，当前目录下的img目录中
 save_dir = Path('img')
 save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -39,8 +38,8 @@ def download_image(image_url, image_count):
 
 try:
     image_count = 0
-    # 下载图片数量
-    while image_count < 500: 
+    # 下载图片数量，默认100（
+    while image_count < 100: 
         download_image(url, image_count)
         image_count += 1
 except KeyboardInterrupt:
