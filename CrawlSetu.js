@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, createWriteStream } from 'fs'
 import { join } from 'path'
-import { get } from 'http'
+import { get } from 'http' // 当URL为https时因修改为'https'
 
 // 设置图片保存目录，当前目录下的img目录中
 const saveDir = 'img'
@@ -14,7 +14,7 @@ if (!existsSync(saveDir)) {
 }
 
 // 爬取的URL地址
-const url = 'http://moe.jitsu.top/r18'
+const url = 'URL链接'
 
 // 下载图片
 function downloadImage(url, index) {

@@ -15,7 +15,7 @@ save_dir = Path('img')
 save_dir.mkdir(parents=True, exist_ok=True)
 
 # 爬取的图片地址
-url = 'http://moe.jitsu.top/r18'
+url = 'URL链接'
 
 # 下载图片
 def download_image(image_url, image_count):

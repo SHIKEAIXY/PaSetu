@@ -10,14 +10,14 @@ git clone https://gitee.com/SHIKEAIXY/PaSetu.git
 
 # 使用
 
-1. 下载 [Node.Js](https://nodejs.cn) 运行
+1. 下载 [Node.Js ≥ 17.6](https://nodejs.cn) 运行，自行配置URL链接
 
 ```
 pnpm install
 node CrawlSetu
 ```
 
-2. 下载 [Python](https://python.org) 运行
+2. 下载 [Python](https://python.org) 运行，自行配置URL链接
 
 ```
 python CrawlSetu.py
