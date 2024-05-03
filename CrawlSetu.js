@@ -1,33 +1,36 @@
-import { existsSync, mkdirSync, createWriteStream } from 'fs';
-import { join } from 'path';
-import { get } from 'http';
+import { existsSync, mkdirSync, createWriteStream } from 'fs'
+import { join } from 'path'
+import { get } from 'http'
 
 // 设置图片保存目录
-const saveDir = 'img';
+const saveDir = 'img'
 if (!existsSync(saveDir)) {
-    mkdirSync(saveDir, { recursive: true });
+    try {
+        mkdirSync(saveDir, { recursive: true })
+    } catch (err) {
+        console.error("Failed to create directory:", err)
+        process.exit(1) // 退出
+    }
 }
 
-// 爬取的图片地址
-const url = 'http://loli.tianyi.one'
+// 爬取的URL地址
+const url = 'http://moe.jitsu.top/r18'
 
 // 下载图片
-function downloadImage(imageUrl, imageCount) {
-    get(imageUrl, (response) => {
+function downloadImage(url, index) {
+    get(url, (response) => {
         if (response.statusCode === 200) {
-            // 从URL中提取文件名
-            const fileName = `SHIKEAIXY_${imageCount}.png`
+            const fileName = `SHIKEAIXY_${index}.png`
             const filePath = join(saveDir, fileName)
             const outFile = createWriteStream(filePath)
 
-            response.pipe(outFile)
+            response.pipe(outFile);
 
             outFile.on('finish', () => {
-                 outFile.close();
+                outFile.close();
                 console.log(`Downloaded ${fileName}\n中文：已下载 ${fileName}`)
-                // 在图片下载完成后递归调用下载下一张图片
-                if (imageCount < maxImages) {
-                    downloadImage(url, imageCount + 1)
+                if (index < maxImages) {
+                    downloadImage(url, index + 1)
                 }
             })
         } else {
@@ -35,9 +38,9 @@ function downloadImage(imageUrl, imageCount) {
         }
     }).on('error', (err) => {
         console.error("Error downloading image:", err)
-    });
+    })
 }
 
-// 下载图片数量
+// 下载图片数量，默认500（
 const maxImages = 500
 downloadImage(url, 0)
