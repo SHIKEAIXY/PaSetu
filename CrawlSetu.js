@@ -13,12 +13,13 @@ if (!existsSync(saveDir)) {
     }
 }
 
-// 爬取的URL地址
+// 爬取的URL地址，或许 loli.tianyi.one
 const url = 'URL链接'
 
 // 下载图片
 function downloadImage(url, index) {
     get(url, (response) => {
+       //console.log(console.log(response.statusCode))
         if (response.statusCode === 200) {
             const fileName = `SHIKEAIXY_${index}.png`
             const filePath = join(saveDir, fileName)
@@ -28,19 +29,19 @@ function downloadImage(url, index) {
 
             outFile.on('finish', () => {
                 outFile.close();
-                console.log(`Downloaded ${fileName}\n中文：已下载 ${fileName}`)
+                console.log(`Downloaded ${fileName}\n已下载 ${fileName}`)
                 if (index < maxImages) {
                     downloadImage(url, index + 1)
                 }
             })
         } else {
-            console.log("Failed to retrieve image.\n中文：无法获取图片。")
+            console.log("Failed to retrieve image.\n无法获取图片。")
         }
     }).on('error', (err) => {
         console.error("Error downloading image:", err)
     })
 }
 
-// 下载图片数量，默认100（
-const maxImages = 100
+// 下载图片数量，默认200（
+const maxImages = 200
 downloadImage(url, 0)
