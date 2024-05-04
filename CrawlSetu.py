@@ -24,23 +24,25 @@ def download_image(image_url, image_count):
         response.raise_for_status()  # 检查是否请求成功
         if response.status_code == 200:
             # 从Content-Disposition头或URL中提取文件名
-            #'_' + str(uuid.uuid1())
-            file_name = 'SHIKEAIXY_' + str(image_count) + '.png'
-
+            file_extension = os.path.splitext(urlparse(image_url).path)[1]
+            file_name = f"image_{str(uuid.uuid4())}{file_extension}"
             with open(save_dir / file_name, 'wb') as out_file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, out_file)
-            logger.info(f"Downloaded {file_name}\n已下载 {file_name}")
+            logger.info(f"已下载 {file_name}")
         else:
-            logger.warning("Failed to retrieve image.\n无法获取图片。")
+            logger.warning(f"无法获取图片.状态码: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"下载图片时出错：{str(e)}")
     except Exception as e:
-        logger.error(f"Error downloading image: {str(e)}\n下载图片时出错：{str(e)}")
+        logger.error(f"发生未知错误：{str(e)}")
 
 try:
     image_count = 0
-    # 下载图片数量，默认200（
+
+    # 下载图片数量，默认200
     while image_count < 200: 
         download_image(url, image_count)
         image_count += 1
 except KeyboardInterrupt:
-    logger.info("Interrupted by user.\n用户中断了操作。")
+    logger.info("中断了操作")
