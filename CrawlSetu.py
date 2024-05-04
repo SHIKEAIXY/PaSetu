@@ -1,12 +1,11 @@
-import os
 import shutil
-import requests
-from urllib.parse import urlparse
+import requests # type: ignore
 from pathlib import Path
 import uuid
 import logging
 
-logging.basicConfig(level=logging.INFO)
+# 设置日志记录
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 # 设置图片保存目录，当前目录上一级img目录中
@@ -20,15 +19,15 @@ url = 'http://URL链接'
 def download_image(image_url, image_count):
     try:
         response = requests.get(image_url, stream=True)
-        response.raise_for_status() 
+        response.raise_for_status()  # 检查是否请求成功
         if response.status_code == 200:
             # 从Content-Disposition头或URL中提取文件名
-            file_extension = os.path.splitext(urlparse(image_url).path)[1]
+            file_extension = ".png"
             file_name = f"image_{str(uuid.uuid4())}{file_extension}"
             with open(save_dir / file_name, 'wb') as out_file:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, out_file)
-            logger.info(f"已下载 {file_name}")
+            logger.info(f"{image_count}: 已下载 {file_name}")
         else:
             logger.warning(f"无法获取图片. 状态码: {response.status_code}")
     except requests.exceptions.RequestException as e:
@@ -41,7 +40,7 @@ try:
 
     # 下载图片数量，默认200
     while image_count < 200: 
-        download_image(url, image_count)
         image_count += 1
+        download_image(url, image_count)
 except KeyboardInterrupt:
-    logger.info("操作被中断")
+    logger.info("中断了操作")
