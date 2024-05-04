@@ -6,7 +6,6 @@ from pathlib import Path
 import uuid
 import logging
 
-# 设置日志记录
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -15,13 +14,13 @@ save_dir = Path('../img')
 save_dir.mkdir(parents=True, exist_ok=True)
 
 # 爬取的图片地址，或许 loli.tianyi.one
-url = 'URL链接'
+url = 'http://URL链接'
 
 # 下载图片
 def download_image(image_url, image_count):
     try:
         response = requests.get(image_url, stream=True)
-        response.raise_for_status()  # 检查是否请求成功
+        response.raise_for_status() 
         if response.status_code == 200:
             # 从Content-Disposition头或URL中提取文件名
             file_extension = os.path.splitext(urlparse(image_url).path)[1]
@@ -31,7 +30,7 @@ def download_image(image_url, image_count):
                 shutil.copyfileobj(response.raw, out_file)
             logger.info(f"已下载 {file_name}")
         else:
-            logger.warning(f"无法获取图片.状态码: {response.status_code}")
+            logger.warning(f"无法获取图片. 状态码: {response.status_code}")
     except requests.exceptions.RequestException as e:
         logger.error(f"下载图片时出错：{str(e)}")
     except Exception as e:
@@ -45,4 +44,4 @@ try:
         download_image(url, image_count)
         image_count += 1
 except KeyboardInterrupt:
-    logger.info("中断了操作")
+    logger.info("操作被中断")
