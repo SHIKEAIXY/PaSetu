@@ -13,6 +13,7 @@ git clone https://gitee.com/SHIKEAIXY/PaSetu.git
 1. 下载 [Node.Js ≥ 17.6](https://nodejs.cn) 运行，自行配置URL链接
 
 ```
+cd PaSetu
 npm add uuid
 node CrawlSetu
 ```
@@ -20,6 +21,7 @@ node CrawlSetu
 2. 下载 [Python](https://python.org) 运行，自行配置URL链接
 
 ```
+cd PaSetu
 pip install requests
 python CrawlSetu.py
 ```
