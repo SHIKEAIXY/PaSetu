@@ -14,7 +14,7 @@ git clone https://gitee.com/SHIKEAIXY/PaSetu.git
 
 ```
 cd PaSetu
-npm add uuid
+npm install
 node CrawlSetu
 ```
 
@@ -22,7 +22,7 @@ node CrawlSetu
 
 ```
 cd PaSetu
-pip install requests
+pip install -r requirements.txt
 python CrawlSetu.py
 ```
 
