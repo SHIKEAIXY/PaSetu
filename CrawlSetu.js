@@ -3,7 +3,7 @@ import { join } from 'path'
 import { get } from 'http'
 import { v4 as uuidv4 } from 'uuid'
 
-// 爬取的URL地址，或许 loli.tianyi.one
+// 爬取的URL地址，或许 loli.tianyi.one 
 const url = 'http://URL链接'
 // 设置图片保存目录，当前目录上一级img目录中
 const saveDir = '../img'
@@ -34,7 +34,8 @@ async function downloadImages(url, saveDir, maxImages = 200) {
         try {
             await downloadImage(url, outFile, fileName)
             downloadedCount++
-            console.log(`${downloadedCount}: 已下载 ${fileName}`)
+            const currentTime = new Date().toLocaleString() 
+            console.log(`${currentTime}- ${downloadedCount}: 已下载 ${fileName}`) 
         } catch (error) {
             console.error(`下载失败 ${fileName}: ${error.message}`)
         }
@@ -74,4 +75,3 @@ process.on('SIGINT', function() {
     console.log("操作被中断")
     process.exit()
 })
-
