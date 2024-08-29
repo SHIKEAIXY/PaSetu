@@ -3,17 +3,15 @@ import { join } from 'path'
 import { get } from 'http'
 import { v4 as uuidv4 } from 'uuid'
 
-// 爬取的URL地址，或许 loli.tianyi.one 
+// 设置URL地址，或许 loli.tianyi.one 
 const url = 'http://URL链接'
-// 设置图片保存目录，当前目录上一级img目录中
+// 设置图片保存目录
 const saveDir = '../img'
 
-// 生成随机字符串
 function generateRandomString() {
     return uuidv4().replace(/-/g, '')
 }
 
-// 下载图片
 async function downloadImages(url, saveDir, maxImages = 200) {
     if (!existsSync(saveDir)) {
         try {
@@ -42,7 +40,6 @@ async function downloadImages(url, saveDir, maxImages = 200) {
     }
 }
 
-// 下载单张图片
 function downloadImage(url, outFile) {
     return new Promise((resolve, reject) => {
         get(url, (response) => {
@@ -56,7 +53,7 @@ function downloadImage(url, outFile) {
                     reject(new Error("写入错误: " + err))
                 })
             } else {
-                reject(new Error("获取图片失败.状态码: " + response.statusCode));
+                reject(new Error("获取图片失败.状态码: " + response.statusCode))
             }
         }).on('error', (err) => {
             reject(new Error("下载图片出错: " + err))

@@ -1,7 +1,5 @@
 # 爬 URL 下载图片到本地
 
-# 修改岁纳京子的程序进行优化
-
 # 下载 
 
 ```
@@ -17,15 +15,6 @@ cd PaSetu
 npm install
 node CrawlSetu
 ```
-
-2. 下载 [Python](https://python.org) 运行，自行配置URL链接
-
-```
-cd PaSetu
-pip install -r requirements.txt
-python CrawlSetu.py
-```
-
 # 免责声明
 
-功能仅限内部交流与小范围使用，请勿用于以盈利为目的的场景
+功能仅限学习交流与小范围使用，请勿用于以盈利为目的的场景
