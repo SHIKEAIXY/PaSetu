@@ -13,7 +13,7 @@ git clone https://gitee.com/SHIKEAIXY/PaSetu.git
 ```
 cd PaSetu
 npm install
-node CrawlSetu
+node .
 ```
 # 免责声明
 

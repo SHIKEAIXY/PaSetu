@@ -1,12 +1,12 @@
-import { existsSync, mkdirSync, createWriteStream } from 'fs'
+import axios from 'axios'
 import { join } from 'path'
-import { get } from 'http'
 import { v4 as uuidv4 } from 'uuid'
+import { existsSync, mkdirSync, createWriteStream } from 'fs'
 
-// 设置URL地址，或许 loli.tianyi.one 
+// 设置URL地址 或许可以loli.tianyi.one
 const url = 'http://URL链接'
 // 设置图片保存目录
-const saveDir = '../img'
+const saveDir = '../Img'
 
 function generateRandomString() {
     return uuidv4().replace(/-/g, '')
@@ -24,41 +24,45 @@ async function downloadImages(url, saveDir, maxImages = 200) {
     let downloadedCount = 0
 
     for (let index = 0; index < maxImages; index++) {
-        const randomString = generateRandomString() 
-        const fileName = `image_${randomString}.png` 
+        const randomString = generateRandomString()
+        const fileName = `image_${randomString}.png`
         const filePath = join(saveDir, fileName)
         const outFile = createWriteStream(filePath)
 
         try {
             await downloadImage(url, outFile, fileName)
             downloadedCount++
-            const currentTime = new Date().toLocaleString() 
-            console.log(`${currentTime}- ${downloadedCount}: 已下载 ${fileName}`) 
+            const currentTime = new Date().toLocaleString()
+            console.log(`${currentTime}- ${downloadedCount}: 已下载 ${fileName}`)
         } catch (error) {
             console.error(`下载失败 ${fileName}: ${error.message}`)
         }
     }
 }
 
-function downloadImage(url, outFile) {
-    return new Promise((resolve, reject) => {
-        get(url, (response) => {
-            if (response.statusCode === 200) {
-                response.pipe(outFile)
-                outFile.on('finish', () => {
-                    outFile.close()
-                    resolve()
-                })
-                outFile.on('error', (err) => {
-                    reject(new Error("写入错误: " + err))
-                })
-            } else {
-                reject(new Error("获取图片失败.状态码: " + response.statusCode))
-            }
-        }).on('error', (err) => {
-            reject(new Error("下载图片出错: " + err))
+async function downloadImage(url, outFile, fileName) {
+    try {
+        const response = await axios({
+            method: 'GET',
+            url: url,
+            responseType: 'stream'
         })
-    })
+
+        if (response.status >= 300 && response.status < 400) {
+            return downloadImage(response.headers.location, outFile, fileName)
+        }
+
+        response.data.pipe(outFile)
+        outFile.on('finish', () => outFile.close())
+    } catch (error) {
+        if (error.response) {
+            throw new Error(`获取图片失败.状态码: ${error.response.status}`)
+        } else if (error.request) {
+            throw new Error("下载图片出错: 没有收到响应")
+        } else {
+            throw new Error("下载图片出错: " + error.message)
+        }
+    }
 }
 
 // 下载图片数量，默认200
