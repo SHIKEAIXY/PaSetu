@@ -2,8 +2,13 @@
 
 # 下载 
 
+## Gitee下载
 ```
 git clone https://gitee.com/SHIKEAIXY/PaSetu.git
+```
+## Github下载
+```
+git clone https://github.com/SHIKEAIXY/PaSetu.git
 ```
 
 # 使用

@@ -7,6 +7,8 @@ import { existsSync, mkdirSync, createWriteStream } from 'fs'
 const url = 'http://URL链接'
 // 设置图片保存目录
 const saveDir = '../Img'
+// 单次下载图片数量
+const Images = 200
 
 function generateRandomString() {
     return uuidv4().replace(/-/g, '')
@@ -65,8 +67,7 @@ async function downloadImage(url, outFile, fileName) {
     }
 }
 
-// 下载图片数量，默认200
-downloadImages(url, saveDir, 200).then(() => {
+downloadImages(url, saveDir, Images).then(() => {
     console.log("所有图片已成功下载！")
 }).catch((error) => {
     console.error("下载图片失败:", error.message)
