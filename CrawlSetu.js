@@ -1,79 +1,122 @@
-import axios from 'axios'
-import { join } from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import { existsSync, mkdirSync, createWriteStream } from 'fs'
+import axios from 'axios';
+import https from 'https';
+import { join, dirname } from 'path';
+import { existsSync, mkdirSync, createWriteStream } from 'fs';
+import { createHash } from 'crypto';
+import { fileURLToPath } from 'url';
 
-// 设置URL地址 或许可以loli.tianyi.one
-const url = 'http://URL链接'
-// 设置图片保存目录
-const saveDir = '../Img'
-// 单次下载图片数量
-const Images = 200
+// 配置参数
+const CONFIG = {
+  baseUrl: 'http://127.0.0.1:5366/Fafa',
+  saveDir: join(dirname(fileURLToPath(import.meta.url)), '../Img'),
+  concurrency: 10, // 并发下载数量
+  maxRetries: 3,  // 单张图片最大重试次数
+  timeout: 0   // 单次请求超时(毫秒)
+};
 
-function generateRandomString() {
-    return uuidv4().replace(/-/g, '')
+// 全局状态
+const state = {
+  downloaded: new Set(),
+  stats: {
+    total: 0,
+    success: 0,
+    skipped: 0,
+    failed: 0
+  }
+};
+
+// HTTP客户端
+const httpClient = axios.create({
+  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+  timeout: CONFIG.timeout,
+  headers: { 'User-Agent': 'Mozilla/5.0' }
+});
+
+// 获取文件名
+function optimizeFilename(response) {
+  const getExt = (type) => ({
+    'image/png': '.png',
+    'image/jpeg': '.jpg',
+    'image/webp': '.webp'
+  }[type] || '.webp');
+
+  try {
+    const disposition = response.headers['content-disposition'] || '';
+    const filename = disposition.match(/filename\*?=["']?(?:UTF-\d['"]*)?([^;\r\n"']*)["']?/i)?.[1] 
+                   || new URL(response.config.url).pathname.split('/').pop() 
+                   || `dl_${Date.now()}`;
+    
+    return decodeURIComponent(filename)
+      .replace(/[^\w.-]/g, '')
+      .replace(/(\.\w+)?$/, getExt(response.headers['content-type']));
+  } catch {
+    return `dl_${Date.now()}.webp`;
+  }
 }
 
-async function downloadImages(url, saveDir, maxImages = 200) {
-    if (!existsSync(saveDir)) {
-        try {
-            mkdirSync(saveDir, { recursive: true })
-        } catch (err) {
-            throw new Error("创建目录失败: " + err)
-        }
+// 下载单个文件
+async function downloadFile(url, retryCount = 0) {
+  const id = ++state.stats.total;
+  
+  try {
+    const response = await httpClient.get(url, { 
+      responseType: 'arraybuffer',
+      timeout: CONFIG.timeout
+    });
+
+    const buffer = response.data;
+    const hash = createHash('md5').update(buffer).digest('hex');
+
+    // 重复检测
+    if (state.downloaded.has(hash)) {
+      state.stats.skipped++;
+      process.stdout.write(`\r[${id}] 跳过重复文件 | 成功:${state.stats.success} 失败:${state.stats.failed}`);
+      return;
     }
 
-    let downloadedCount = 0
+    // 写入
+    const filename = optimizeFilename(response);
+    const writer = createWriteStream(join(CONFIG.saveDir, filename));
+    writer.write(buffer);
+    writer.end();
 
-    for (let index = 0; index < maxImages; index++) {
-        const randomString = generateRandomString()
-        const fileName = `image_${randomString}.png`
-        const filePath = join(saveDir, fileName)
-        const outFile = createWriteStream(filePath)
+    state.downloaded.add(hash);
+    state.stats.success++;
+    process.stdout.write(`\r[${id}] 下载:${filename.padEnd(20)} | 成功:${state.stats.success} 失败:${state.stats.failed}`);
 
-        try {
-            await downloadImage(url, outFile, fileName)
-            downloadedCount++
-            const currentTime = new Date().toLocaleString()
-            console.log(`${currentTime}- ${downloadedCount}: 已下载 ${fileName}`)
-        } catch (error) {
-            console.error(`下载失败 ${fileName}: ${error.message}`)
-        }
+  } catch (error) {
+    if (retryCount < CONFIG.maxRetries) {
+      return downloadFile(url, retryCount + 1);
     }
+    state.stats.failed++;
+    process.stdout.write(`\r[${id}] 下载失败 | 成功:${state.stats.success} 失败:${state.stats.failed}`);
+  }
 }
 
-async function downloadImage(url, outFile, fileName) {
-    try {
-        const response = await axios({
-            method: 'GET',
-            url: url,
-            responseType: 'stream'
-        })
+// 下载控制器
+async function burstDownload() {
+  if (!existsSync(CONFIG.saveDir)) {
+    mkdirSync(CONFIG.saveDir, { recursive: true });
+  }
 
-        if (response.status >= 300 && response.status < 400) {
-            return downloadImage(response.headers.location, outFile, fileName)
-        }
-
-        response.data.pipe(outFile)
-        outFile.on('finish', () => outFile.close())
-    } catch (error) {
-        if (error.response) {
-            throw new Error(`获取图片失败.状态码: ${error.response.status}`)
-        } else if (error.request) {
-            throw new Error("下载图片出错: 没有收到响应")
-        } else {
-            throw new Error("下载图片出错: " + error.message)
-        }
+  console.log(`🚀 正在爬取图片(线程数:${CONFIG.concurrency})`);
+  
+  const workers = Array(CONFIG.concurrency).fill().map(async (_, i) => {
+    while (true) {
+      await downloadFile(CONFIG.baseUrl);
     }
+  });
+
+  await Promise.all(workers);
 }
 
-downloadImages(url, saveDir, Images).then(() => {
-    console.log("所有图片已成功下载！")
-}).catch((error) => {
-    console.error("下载图片失败:", error.message)
-})
+// 退出统计
+process.on('SIGINT', () => {
+  console.log('\n\n📊 最终统计:');
+  console.log(`总请求: ${state.stats.total} 成功: ${state.stats.success}`);
+  console.log(`跳过重复: ${state.stats.skipped} 失败: ${state.stats.failed}`);
+  process.exit();
+});
 
-process.on('SIGINT', function() {
-    console.log("操作被中断")
-    process.exit()
-})
+// 启动
+burstDownload().catch(console.error);
